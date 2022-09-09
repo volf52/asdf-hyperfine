@@ -45,21 +45,25 @@ get_latest_version() {
   echo "$latest_version"
 }
 
-download_release() {
-  local version filename url
-  version="$1"
-  filename="$2"
-
+sanitize_version() {
   if [ "$version" = "latest" ]; then
     version=$(get_latest_version)
   else
     version="v$version"
   fi
 
+  echo "$version"
+}
+
+download_release() {
+  local version filename url
+  version="$1"
+  filename="$2"
+
   url="$GH_REPO/releases/download/${version}/${filename}"
 
   echo "* Downloading $TOOL_NAME release $version..."
-  curl "${curl_opts[@]}" -o "$release_file" -C - "$url" || fail "Could not download $url"
+  curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
 }
 
 get_arch() {
@@ -101,6 +105,7 @@ get_platform() {
 install_version() {
   local install_type="$1"
   local version="$2"
+  version=$(sanitize_version "$version")
   local install_path="${3%/bin}/bin"
 
   if [ "$install_type" != "version" ]; then
@@ -110,7 +115,7 @@ install_version() {
   arch="$(get_arch)"
   platform="$(get_platform)"
 
-  local base_name="hyperfine-v$version-$arch-$platform"
+  local base_name="hyperfine-$version-$arch-$platform"
   local release_file="$base_name.tar.gz"
 
   (

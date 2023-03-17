@@ -115,6 +115,11 @@ install_version() {
   arch="$(get_arch)"
   platform="$(get_platform)"
 
+  # there's no binary for Apple silicon but the one for amd64 works
+  if [ "$platform" = "apple-darwin" ] && [ "$arch" = "aarch64" ]; then
+    arch="x86_64"
+  fi
+
   local base_name="hyperfine-$version-$arch-$platform"
   local release_file="$base_name.tar.gz"
 
